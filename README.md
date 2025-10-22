@@ -1,23 +1,21 @@
-# MarkenX - Modelo de IA
+# MarkenX - Videojuego Educativo
 
 ## Descripción
-Este repositorio contiene el backend de IA para el videojuego educativo MarkenX.
-Utiliza Reinforcement Learning (PPO con PyTorch) para simular la aceptación del consumidor basada en factores culturales, sociales, personales y psicológicos, ajustes en las 4P (Producto, Precio, Plaza, Promoción) y eventos macroentorno.
+Repositorio principal para el videojuego en Unity con integración de ML-Agents.
+Simula escenarios de marketing para enseñar conducta del consumidor.
 
 ## Requisitos
-- Python 3.12+
-- Bibliotecas: torch, stable-baselines3, gymnasium, numpy
-- Instalación: `pip install -r requirements.txt` (crea un requirements.txt con `pip freeze > requirements.txt` después de instalar).
+- Unity 2022+ (con ML-Agents package).
+- Python para backend (ver repo de IA).
 
 ## Estructura de Carpetas
-- `/src`: Código fuente (p. ej. entornos RL, scripts de entrenamiento).
-- `/data`: Datasets sintéticos.
-- `/models`: Modelos entrenados.
+- `/unity-project`: Proyecto Unity principal.
+- `/backend-scripts`: Scripts para inferencia del modelo RL.
 
-## ¿Cómo Ejecutar?
-1. Clonar el repo: `git clone https://github.com/DeividN21/udla-markenx-ia-model.git`
-2. Instala dependencias: `pip install torch stable-baselines3 gymnasium numpy`
-3. Ejecuta entrenamiento: `python src/train_model.py`
+## Cómo Ejecutar
+1. Clona el repo: `git clone https://github.com/tu-usuario/markenx-videojuego.git`
+2. Abre en Unity: Importa la carpeta `/unity-project`.
+3. Integra modelo: Copia el modelo entrenado del repo de IA a assets.
 
-## Integración
-Este modelo se integra con el repositorio principal del videojuego: [udla-markenx-videogame](https://github.com/DeividN21/udla-markenx-videogame.git).
+## Integración con IA
+Usa el modelo de [udla-markenx-ia-model](https://github.com/DeividN21/udla-markenx-ia-model.git) para simulación en runtime.
