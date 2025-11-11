@@ -87,10 +87,9 @@ public class GameUIManager : MonoBehaviour
         
         Debug.Log("Turno enviado, esperando lógica de IA...");
 
-        // 4. Si se cumple la condición de ganar (p. ej: aceptación >= 80%)
-        // O si se pierde (p. ej: presupuesto <= 0)
-        // Cargar la escena de Reporte
-        // SceneManager.LoadScene(escenaReporte);
+        // 4. SIMULACIÓN DE VICTORIA:
+        // Por ahora, CADA clic en "ENVIAR" es una victoria
+        SceneManager.LoadScene(escenaReporte);
     }
 
     public void BotonIrAMenu()
