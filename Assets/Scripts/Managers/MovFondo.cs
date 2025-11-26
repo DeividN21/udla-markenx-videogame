@@ -1,17 +1,18 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MovFondo : MonoBehaviour
+namespace Managers
 {
-    public RawImage _img;
-    public float _x;
-    public float _y;
-
-    // Para movimiento del fondo
-    void Update()
+    public class MovFondo : MonoBehaviour
     {
-        _img.uvRect = new Rect(_img.uvRect.position + new Vector2(_x, _y) * Time.deltaTime, _img.uvRect.size);
+        public RawImage _img;
+        public float _x;
+        public float _y;
+
+        // Para movimiento del fondo
+        void Update()
+        {
+            _img.uvRect = new Rect(_img.uvRect.position + new Vector2(_x, _y) * Time.deltaTime, _img.uvRect.size);
+        }
     }
 }

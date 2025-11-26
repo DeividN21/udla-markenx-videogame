@@ -1,13 +1,16 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GraficoSceneManager : MonoBehaviour
+namespace Managers
 {
-    // El nombre de la escena de reporte a la que se desea volver
-    public string escenaReporte = "EndGameScene";
-
-    public void VolverAReporte()
+    public class GraficoSceneManager : MonoBehaviour
     {
-        SceneManager.LoadScene(escenaReporte);
+        // El nombre de la escena de reporte a la que se desea volver
+        public string escenaReporte = "EndGameScene";
+
+        public void VolverAReporte()
+        {
+            SceneManager.LoadScene(escenaReporte);
+        }
     }
 }

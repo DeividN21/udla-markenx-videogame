@@ -1,7 +1,10 @@
-public enum AgeGroup
+namespace MyProject.Domain.Enums
 {
-  Kid,
-  Teen,
-  Adult,
-  Senior
+  public enum AgeGroup
+  {
+    Kid,
+    Teen,
+    Adult,
+    Senior
+  }
 }

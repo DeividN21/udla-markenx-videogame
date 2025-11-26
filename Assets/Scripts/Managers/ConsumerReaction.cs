@@ -1,45 +1,48 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ConsumerReaction : MonoBehaviour
+namespace Managers
 {
-    [Header("Referencias")]
-    public Image imagenConsumidor;
-
-    [Header("Sprites de Reacción")]
-    public Sprite spriteEnojado;  // 0% - 40%
-    public Sprite spriteNeutral;  // 41% - 75%
-    public Sprite spriteFeliz;    // 76% - 100%
-
-    private GameSceneManager manager;
-
-    void Start()
+    public class ConsumerReaction : MonoBehaviour
     {
-        manager = GameSceneManager.Instance;
-        if (imagenConsumidor == null) imagenConsumidor = GetComponent<Image>();
-    }
+        [Header("Referencias")]
+        public Image imagenConsumidor;
 
-    void Update()
-    {
-        if (manager == null) return;
+        [Header("Sprites de Reacción")]
+        public Sprite spriteEnojado;  // 0% - 40%
+        public Sprite spriteNeutral;  // 41% - 75%
+        public Sprite spriteFeliz;    // 76% - 100%
 
-        // Actualizar cada frame
-        ActualizarExpresion(manager.GetAceptacionActual());
-    }
+        private GameSceneManager manager;
 
-    void ActualizarExpresion(float aceptacion)
-    {
-        if (aceptacion < 40)
+        void Start()
         {
-            imagenConsumidor.sprite = spriteEnojado;
+            manager = GameSceneManager.Instance;
+            if (imagenConsumidor == null) imagenConsumidor = GetComponent<Image>();
         }
-        else if (aceptacion < 75)
+
+        void Update()
         {
-            imagenConsumidor.sprite = spriteNeutral;
+            if (manager == null) return;
+
+            // Actualizar cada frame
+            ActualizarExpresion(manager.GetAceptacionActual());
         }
-        else
+
+        void ActualizarExpresion(float aceptacion)
         {
-            imagenConsumidor.sprite = spriteFeliz;
+            if (aceptacion < 40)
+            {
+                imagenConsumidor.sprite = spriteEnojado;
+            }
+            else if (aceptacion < 75)
+            {
+                imagenConsumidor.sprite = spriteNeutral;
+            }
+            else
+            {
+                imagenConsumidor.sprite = spriteFeliz;
+            }
         }
     }
 }

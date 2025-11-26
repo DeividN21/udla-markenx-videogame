@@ -1,9 +1,13 @@
 using System.Linq;
+using MyProject.Domain.Models;
 
-public class ConsumerInterestService
+namespace MyProject.Domain.Services
 {
-  public bool IsInterestedIn(Consumer consumer, Product product)
+  public class ConsumerInterestService
   {
-    return consumer.Interests.Contains(product.Category);
+    public bool IsInterestedIn(Consumer consumer, Product product)
+    {
+      return consumer.Interests.Contains(product.Category);
+    }
   }
 }

@@ -1,14 +1,19 @@
-public class Product
+using MyProject.Domain.Enums;
+
+namespace MyProject.Domain.Models
 {
-  private readonly ProductCategory _category;
-  private readonly float _price;
-
-  public Product(ProductCategory category, float price)
+  public class Product
   {
-    _category = category;
-    _price = price;
-  }
+    private readonly ProductCategory _category;
+    private readonly float _price;
 
-  public ProductCategory Category => _category;
-  public float Price => _price;
+    public Product(ProductCategory category, float price)
+    {
+      _category = category;
+      _price = price;
+    }
+
+    public ProductCategory Category => _category;
+    public float Price => _price;
+  }
 }

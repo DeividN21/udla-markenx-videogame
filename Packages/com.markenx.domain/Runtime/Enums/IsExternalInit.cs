@@ -1,4 +1,4 @@
-namespace System.Runtime.CompilerServices
+namespace MyProject.Domain.Enums
 {
   public static class IsExternalInit { }
 }

@@ -1,9 +1,12 @@
-public enum ProductCategory
+namespace MyProject.Domain.Enums
 {
-  Technology,
-  Food,
-  Clothing,
-  Toys,
-  Sports,
-  Education
+  public enum ProductCategory
+  {
+    Technology,
+    Food,
+    Clothing,
+    Toys,
+    Sports,
+    Education
+  }
 }

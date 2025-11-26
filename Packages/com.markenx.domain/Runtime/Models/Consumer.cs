@@ -1,31 +1,36 @@
 using System;
 using System.Collections.Generic;
+using MyProject.Domain.Enums;
+using MyProject.Domain.Records;
 
-public class Consumer
+namespace MyProject.Domain.Models
 {
-  private readonly NationalIdentityDocument _nationalID;
-  private readonly HashSet<ProductCategory> _interests;
-  private readonly decimal _monthlyIncome;
-
-  public Consumer(
-    NationalIdentityDocument nationalID,
-    IEnumerable<ProductCategory> interests,
-    decimal monthlyIncome)
+  public class Consumer
   {
-    _nationalID = RequireNationalIdentityDocument(nationalID);
-    _interests = new HashSet<ProductCategory>(interests);
-    _monthlyIncome = monthlyIncome;
-    Age = new PersonAge(_nationalID.BirthDate);
-  }
+    private readonly NationalIdentityDocument _nationalID;
+    private readonly HashSet<ProductCategory> _interests;
+    private readonly decimal _monthlyIncome;
 
-  public string FirstName => _nationalID.FirstName;
-  public string LastName => _nationalID.LastName;
-  public PersonAge Age { get; }
-  public IReadOnlyCollection<ProductCategory> Interests => _interests;
-  public decimal MonthlyIncome => _monthlyIncome;
+    public Consumer(
+      NationalIdentityDocument nationalID,
+      IEnumerable<ProductCategory> interests,
+      decimal monthlyIncome)
+    {
+      _nationalID = RequireNationalIdentityDocument(nationalID);
+      _interests = new HashSet<ProductCategory>(interests);
+      _monthlyIncome = monthlyIncome;
+      Age = new PersonAge(_nationalID.BirthDate);
+    }
 
-  private NationalIdentityDocument RequireNationalIdentityDocument(NationalIdentityDocument nationalID)
-  {
-    return nationalID ?? throw new ArgumentNullException(nameof(nationalID));
+    public string FirstName => _nationalID.FirstName;
+    public string LastName => _nationalID.LastName;
+    public PersonAge Age { get; }
+    public IReadOnlyCollection<ProductCategory> Interests => _interests;
+    public decimal MonthlyIncome => _monthlyIncome;
+
+    private NationalIdentityDocument RequireNationalIdentityDocument(NationalIdentityDocument nationalID)
+    {
+      return nationalID ?? throw new ArgumentNullException(nameof(nationalID));
+    }
   }
 }
