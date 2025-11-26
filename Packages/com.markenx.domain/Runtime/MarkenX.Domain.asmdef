@@ -1,0 +1,19 @@
+{
+  "name": "MarkenX.Domain",
+  "rootNamespace": "MarkenX.Domain",
+
+  "references": [],
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "System.Runtime.dll",
+    "mscorlib.dll",
+    "System.dll",
+    "System.Core.dll"
+  ],
+
+  "autoReferenced": false,
+  "noEngineReferences": true,
+
+  "includePlatforms": [],
+  "excludePlatforms": []
+}
