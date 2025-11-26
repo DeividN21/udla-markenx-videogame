@@ -48,7 +48,7 @@ namespace Managers
         IEnumerator SimularCarga()
         {
             yield return new WaitForSeconds(0.1f);
-            context = MockDataFactory.GetEcoGameContext();
+            // context = MockDataFactory.GetEcoGameContext();
             InicializarEstado();
             SceneManager.LoadScene("GameScene");
         }
@@ -133,7 +133,7 @@ namespace Managers
         private void RecalcularAceptacion()
         {
             aceptacionActual = DistanceMetric.ComputeAcceptance(context.Consumer, context.Product);
-            Debug.Log($"Nueva Aceptación Calculada: {aceptacionActual * 100}%");
+            // Debug.Log($"Nueva Aceptación Calculada: {aceptacionActual * 100}%");
         }
 
         public void EjecutarFinDeJuego(string resultado)
