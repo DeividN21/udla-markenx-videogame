@@ -3,7 +3,7 @@ using UnityEngine; // Necesario para JsonUtility y Debug
 
 public static class MockDataFactory
 {
-    // Se simula la respuesta de la API con este JSON
+    // JSON DE PRUEBA (Solo se usa si no hay API)
     private static string jsonEcoScenario = @"
     {
         ""dimensions"": [
@@ -133,11 +133,22 @@ public static class MockDataFactory
         ]
     }";
 
-    public static GameContext GetEcoGameContext()
+    // Función para obtener el JSON de prueba (Testing)
+    public static string GetMockJson() => jsonEcoScenario;
+
+    // MOTOR DE PARSEO
+    // Esta función recibe CUALQUIER string JSON
+    // y devuelve el objeto GameContext listo para jugar.
+    public static GameContext CrearContextoDesdeJSON(string jsonInput)
     {
-        // 1. DESERIALIZAR (Convertir Texto JSON -> Objetos C#)
-        GameScenarioConfig config = JsonUtility.FromJson<GameScenarioConfig>(jsonEcoScenario);
+        // 1. DESERIALIZAR
+        GameScenarioConfig config = JsonUtility.FromJson<GameScenarioConfig>(jsonInput);
         
+        if (config == null) {
+            Debug.LogError("Error al parsear el JSON. Formato inválido.");
+            return null;
+        }
+
         GameContext ctx = new GameContext();
         ctx.DimensionsMap = new Dictionary<string, DimensionDefinition>();
         ctx.ActionsMap = new Dictionary<string, MarketAction>();
@@ -145,18 +156,16 @@ public static class MockDataFactory
         ctx.EventosConfigurados = config.events ?? new List<EventConfig>();
 
         // 2. CONFIGURAR DIMENSIONES
-        // Se crean las definiciones reales a partir del config
         foreach(var dimConfig in config.dimensions)
         {
             var def = new DimensionDefinition(dimConfig.name, dimConfig.description);
             ctx.DimensionsMap.Add(dimConfig.id, def);
         }
 
-        // 3. CONFIGURAR PERFILES (Consumidor y Producto)
+        // 3. CONFIGURAR PERFILES
         ctx.Consumer = new ConsumerProfile();
         ctx.Product = new ProductProfile();
 
-        // Se llenan los valores iniciales usando el mapa de dimensiones
         foreach(var dimConfig in config.dimensions)
         {
             if(ctx.DimensionsMap.TryGetValue(dimConfig.id, out var def))

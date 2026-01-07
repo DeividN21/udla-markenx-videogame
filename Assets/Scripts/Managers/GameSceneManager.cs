@@ -47,11 +47,33 @@ public class GameSceneManager : MonoBehaviour
         if (usarModoSimulacion) StartCoroutine(SimularCarga());
     }
 
+    // MÉTODO PÚBLICO PARA LA API
+    // Se pasa el string del JSON descargado
+    public void IniciarJuegoDesdeJson(string jsonDeLaApi)
+    {
+        Debug.Log("Iniciando juego desde JSON externo...");
+        // Se usa el parser universal que se creó
+        context = MockDataFactory.CrearContextoDesdeJSON(jsonDeLaApi);
+        
+        if (context != null)
+        {
+            InicializarEstado();
+            LoadScene("GameScene");
+        }
+    }
+
+    // MÉTODO PRIVADO PARA PRUEBAS EN EL EDITOR
     IEnumerator SimularCarga()
     {
         yield return new WaitForSeconds(0.1f);
-        // Carga desde el JSON simulado en MockDataFactory
-        context = MockDataFactory.GetEcoGameContext();
+        
+        Debug.Log("Modo Simulación: Cargando datos Mock...");
+        // Se carga el string del Mock
+        string jsonMock = MockDataFactory.GetMockJson();
+        
+        // Se pasa por el mismo parser que usaría la API
+        context = MockDataFactory.CrearContextoDesdeJSON(jsonMock);
+        
         InicializarEstado();
         LoadScene("GameScene");
     }
