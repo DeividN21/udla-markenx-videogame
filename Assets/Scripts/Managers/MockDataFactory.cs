@@ -56,71 +56,95 @@ public static class MockDataFactory
         },
         ""actions"": [
             {
-                ""id"": ""act-pack-recycle"",
-                ""name"": ""Empaque Reciclado"",
-                ""description"": ""Cartón 100% reciclado."",
-                ""cost"": 150,
-                ""category"": ""ATRIBUTOS_PRODUCCION"",
-                ""isInitiallyLocked"": false,
-                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.30 } ]
+                ""id"": ""act-pack-recycle"", ""name"": ""Empaque Reciclado"", ""description"": ""Cartón 100% reciclado."", ""cost"": 150, 
+                ""category"": ""ATRIBUTOS_PRODUCCION"", ""isInitiallyLocked"": false, 
+                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.30 } ] 
             },
             {
-                ""id"": ""act-bio-mat"",
-                ""name"": ""Mat. Biodegradable"",
-                ""description"": ""Se degrada en 30 días."",
-                ""cost"": 200,
-                ""category"": ""ATRIBUTOS_PRODUCCION"",
-                ""isInitiallyLocked"": true,
-                ""prerequisiteActionId"": ""act-pack-recycle"",
-                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.40 }, { ""dimensionId"": ""dim-quality"", ""delta"": 0.10 } ]
+                ""id"": ""act-bio-mat"", ""name"": ""Mat. Biodegradable"", ""description"": ""Se degrada en 30 días."", ""cost"": 200, 
+                ""category"": ""ATRIBUTOS_PRODUCCION"", ""isInitiallyLocked"": true, ""prerequisiteActionId"": ""act-pack-recycle"", 
+                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.40 }, { ""dimensionId"": ""dim-quality"", ""delta"": 0.10 } ] 
             },
             {
-                ""id"": ""act-local"",
-                ""name"": ""Producción Local"",
-                ""description"": ""Menor huella de carbono."",
-                ""cost"": 100,
-                ""category"": ""ATRIBUTOS_PRODUCCION"",
-                ""isInitiallyLocked"": true,
-                ""prerequisiteActionId"": ""act-pack-recycle"",
-                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.15 } ]
+                ""id"": ""act-local"", ""name"": ""Producción Local"", ""description"": ""Menor huella de carbono."", ""cost"": 100, 
+                ""category"": ""ATRIBUTOS_PRODUCCION"", ""isInitiallyLocked"": true, ""prerequisiteActionId"": ""act-pack-recycle"", 
+                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.15 } ] 
             },
             {
-                ""id"": ""act-carbon"",
-                ""name"": ""Cert. Carbono Neutro"",
-                ""description"": ""Sello internacional."",
-                ""cost"": 250,
-                ""category"": ""ATRIBUTOS_PRODUCCION"",
-                ""isInitiallyLocked"": true,
-                ""prerequisiteActionId"": ""act-bio-mat"",
-                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.40 } ]
+                ""id"": ""act-carbon"", ""name"": ""Cert. Carbono Neutro"", ""description"": ""Sello internacional."", ""cost"": 250, 
+                ""category"": ""ATRIBUTOS_PRODUCCION"", ""isInitiallyLocked"": true, ""prerequisiteActionId"": ""act-bio-mat"", 
+                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.40 } ] 
             },
             {
-                ""id"": ""act-label"",
-                ""name"": ""Etiqueta Verde"",
-                ""description"": ""Look natural."",
-                ""cost"": 100,
-                ""category"": ""ATRIBUTOS_DISENO"",
-                ""isInitiallyLocked"": false,
-                ""effects"": [ { ""dimensionId"": ""dim-social"", ""delta"": 0.10 } ]
+                ""id"": ""act-label"", ""name"": ""Etiqueta Verde"", ""description"": ""Look natural."", ""cost"": 100, 
+                ""category"": ""ATRIBUTOS_DISENO"", ""isInitiallyLocked"": false, 
+                ""effects"": [ { ""dimensionId"": ""dim-social"", ""delta"": 0.10 } ] 
             },
             {
-                ""id"": ""act-research-1"",
-                ""name"": ""Encuesta General"",
-                ""description"": ""Datos básicos."",
-                ""cost"": 100,
-                ""category"": ""EXPLORACION"",
-                ""isInitiallyLocked"": false,
-                ""effects"": []
+                ""id"": ""act-logo"", ""name"": ""Logo Minimalista"", ""description"": ""Estilo moderno."", ""cost"": 150, 
+                ""category"": ""ATRIBUTOS_DISENO"", ""isInitiallyLocked"": true, ""prerequisiteActionId"": ""act-label"", 
+                ""effects"": [ { ""dimensionId"": ""dim-social"", ""delta"": 0.15 } ] 
             },
             {
-                ""id"": ""act-research-2"",
-                ""name"": ""Focus Group Eco"",
-                ""description"": ""Valores ambientales."",
-                ""cost"": 200,
-                ""category"": ""EXPLORACION"",
-                ""isInitiallyLocked"": true,
-                ""prerequisiteActionId"": ""act-research-1"",
-                ""effects"": []
+                ""id"": ""act-price-std"", ""name"": ""Precio Estándar"", ""description"": ""Promedio del mercado."", ""cost"": 50, 
+                ""category"": ""ATRIBUTOS_PRECIO"", ""isInitiallyLocked"": false, 
+                ""effects"": [ { ""dimensionId"": ""dim-price"", ""delta"": 0.05 } ] 
+            },
+            {
+                ""id"": ""act-price-disc"", ""name"": ""Desc. por Reciclaje"", ""description"": ""5% si traen envase."", ""cost"": 80, 
+                ""category"": ""ATRIBUTOS_PRECIO"", ""isInitiallyLocked"": true, ""prerequisiteActionId"": ""act-price-std"", 
+                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.10 } ] 
+            },
+            {
+                ""id"": ""act-sub"", ""name"": ""Suscripción Mensual"", ""description"": ""Envío automático."", ""cost"": 100, 
+                ""category"": ""ATRIBUTOS_PRECIO"", ""isInitiallyLocked"": true, ""prerequisiteActionId"": ""act-price-std"", 
+                ""effects"": [ { ""dimensionId"": ""dim-price"", ""delta"": 0.05 } ] 
+            },
+            {
+                ""id"": ""act-place-online"", ""name"": ""Tienda Online"", ""description"": ""Venta web directa."", ""cost"": 150, 
+                ""category"": ""ATRIBUTOS_PLAZA"", ""isInitiallyLocked"": false, 
+                ""effects"": [ { ""dimensionId"": ""dim-ease"", ""delta"": 0.20 } ] 
+            },
+            {
+                ""id"": ""act-place-org"", ""name"": ""Mercados Orgánicos"", ""description"": ""Puntos de venta eco."", ""cost"": 100, 
+                ""category"": ""ATRIBUTOS_PLAZA"", ""isInitiallyLocked"": true, ""prerequisiteActionId"": ""act-place-online"", 
+                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.15 } ] 
+            },
+            {
+                ""id"": ""act-place-app"", ""name"": ""Apps de Delivery"", ""description"": ""UberEats/Rappi."", ""cost"": 200, 
+                ""category"": ""ATRIBUTOS_PLAZA"", ""isInitiallyLocked"": true, ""prerequisiteActionId"": ""act-place-online"", 
+                ""effects"": [ { ""dimensionId"": ""dim-price"", ""delta"": -0.05 } ] 
+            },
+            {
+                ""id"": ""act-research-1"", ""name"": ""Encuesta General"", ""description"": ""Datos básicos."", ""cost"": 100, 
+                ""category"": ""EXPLORACION"", ""isInitiallyLocked"": false, ""effects"": [] 
+            },
+            {
+                ""id"": ""act-research-2"", ""name"": ""Focus Group Eco"", ""description"": ""Valores ambientales."", ""cost"": 200, 
+                ""category"": ""EXPLORACION"", ""isInitiallyLocked"": true, ""prerequisiteActionId"": ""act-research-1"", ""effects"": [] 
+            },
+            {
+                ""id"": ""act-research-3"", ""name"": ""Análisis Estilo"", ""description"": ""Hábitos de vida."", ""cost"": 150, 
+                ""category"": ""EXPLORACION"", ""isInitiallyLocked"": true, ""prerequisiteActionId"": ""act-research-1"", ""effects"": [] 
+            },
+            {
+                ""id"": ""act-research-4"", ""name"": ""Test Motivacional"", ""description"": ""Impulsos de compra."", ""cost"": 150, 
+                ""category"": ""EXPLORACION"", ""isInitiallyLocked"": true, ""prerequisiteActionId"": ""act-research-1"", ""effects"": [] 
+            },
+            {
+                ""id"": ""act-pub-social"", ""name"": ""Redes Sociales"", ""description"": ""Ads básicos."", ""cost"": 150, 
+                ""category"": ""PUBLICIDAD"", ""isInitiallyLocked"": false, 
+                ""effects"": [ { ""dimensionId"": ""dim-social"", ""delta"": 0.10 } ] 
+            },
+            {
+                ""id"": ""act-pub-influ"", ""name"": ""Influencers Eco"", ""description"": ""Activistas verdes."", ""cost"": 300, 
+                ""category"": ""PUBLICIDAD"", ""isInitiallyLocked"": true, ""prerequisiteActionId"": ""act-pub-social"", 
+                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.10 } ] 
+            },
+            {
+                ""id"": ""act-pub-google"", ""name"": ""Google Ads"", ""description"": ""Búsqueda pagada."", ""cost"": 200, 
+                ""category"": ""PUBLICIDAD"", ""isInitiallyLocked"": true, ""prerequisiteActionId"": ""act-pub-social"", 
+                ""effects"": [ { ""dimensionId"": ""dim-price"", ""delta"": 0.02 } ] 
             }
         ],
         ""events"": [
