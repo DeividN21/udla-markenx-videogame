@@ -18,12 +18,12 @@ public class GameScenarioConfig
 [System.Serializable]
 public class DimensionConfig
 {
-    public string id;       // UUID
-    public string name;     // "PriceSensitivity"
+    public string id;
+    public string name;
     public string displayName; // "Sensibilidad al precio" (para UI)
     public string description;
-    public float consumerExpectation; // 0.0 - 1.0
-    public float productInitialOffer; // 0.0 - 1.0
+    public float consumerExpectation;
+    public float productInitialOffer;
 }
 
 [System.Serializable]
@@ -38,21 +38,21 @@ public class ConsumerConfig
 [System.Serializable]
 public class ActionConfig
 {
-    public string id;       // UUID
+    public string id;
     public string name;
     public string description;
     public float cost;
     public string category; // "PRODUCTION", "DESIGN", etc.
     public bool isInitiallyLocked;
-    public string prerequisiteActionId; // UUID o null
+    public string prerequisiteActionId;
     public List<EffectConfig> effects;
 }
 
 [System.Serializable]
 public class EffectConfig
 {
-    public string dimensionId; // UUID de la dimensión a afectar
-    public float delta;        // +0.15, -0.20, etc.
+    public string dimensionId;
+    public float delta;
 }
 
 [System.Serializable]
@@ -68,7 +68,7 @@ public class EventConfig
 public class EventEffectConfig
 {
     public string dimensionId;
-    public float weightMultiplier; // ej: 5.0
+    public float weightMultiplier;
 }
 
 // ===================================================================================
@@ -81,7 +81,7 @@ public class GameSessionReport
 {
     public string sessionDate;      // Fecha/Hora
     public string finalOutcome;     // "GANASTE" / "PERDISTE"
-    public float finalAcceptance;   // 0.0 - 1.0
+    public float finalAcceptance;
     public int remainingBudget;     
     public int totalTurnsUsed;
     public float profileDiscoveryPercentage;
@@ -108,13 +108,14 @@ public class TurnHistoryLog
 public class AccionInfo 
 {
     public int idAccion; // Se mapea el UUID a un int temporal para la UI vieja si es necesario
-    public string originalUuid; // Guardamos el UUID real
+    public string originalUuid; // UUID real
     public string categoria; 
     public string nombreAccion;
     public string descripcion;
     public float costo;
     public bool esBloqueadaInicialmente; 
-    public string idAccionRequeridaUuid; 
+    public string idAccionRequeridaUuid; // Referencia string del Backend
+    public int idAccionRequerida;        // Referencia numérica para Unity UI 
 }
 
 public class GameContext

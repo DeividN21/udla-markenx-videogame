@@ -1,120 +1,219 @@
 using System.Collections.Generic;
+using UnityEngine; // Necesario para JsonUtility y Debug
 
 public static class MockDataFactory
 {
+    // Se simula la respuesta de la API con este JSON
+    private static string jsonEcoScenario = @"
+    {
+        ""dimensions"": [
+            {
+                ""id"": ""dim-price"",
+                ""name"": ""PriceSensitivity"",
+                ""displayName"": ""Sensibilidad al Precio"",
+                ""description"": ""Importancia del ahorro"",
+                ""consumerExpectation"": 0.4,
+                ""productInitialOffer"": 0.5
+            },
+            {
+                ""id"": ""dim-social"",
+                ""name"": ""SocialRecognition"",
+                ""displayName"": ""Estatus Social"",
+                ""description"": ""Necesidad de reconocimiento"",
+                ""consumerExpectation"": 0.6,
+                ""productInitialOffer"": 0.3
+            },
+            {
+                ""id"": ""dim-quality"",
+                ""name"": ""QualityExpectation"",
+                ""displayName"": ""Calidad Esperada"",
+                ""description"": ""Exigencia de durabilidad"",
+                ""consumerExpectation"": 0.8,
+                ""productInitialOffer"": 0.4
+            },
+            {
+                ""id"": ""dim-eco"",
+                ""name"": ""EcoInterest"",
+                ""displayName"": ""Interés Ecológico"",
+                ""description"": ""Preocupación ambiental"",
+                ""consumerExpectation"": 0.95,
+                ""productInitialOffer"": 0.1
+            },
+            {
+                ""id"": ""dim-ease"",
+                ""name"": ""EaseOfUse"",
+                ""displayName"": ""Facilidad de Uso"",
+                ""description"": ""Simplicidad"",
+                ""consumerExpectation"": 0.7,
+                ""productInitialOffer"": 0.5
+            }
+        ],
+        ""consumer"": {
+            ""name"": ""Barry Seal"",
+            ""age"": 30,
+            ""budget"": 1200,
+            ""targetAcceptanceScore"": 0.80
+        },
+        ""actions"": [
+            {
+                ""id"": ""act-pack-recycle"",
+                ""name"": ""Empaque Reciclado"",
+                ""description"": ""Cartón 100% reciclado."",
+                ""cost"": 150,
+                ""category"": ""ATRIBUTOS_PRODUCCION"",
+                ""isInitiallyLocked"": false,
+                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.30 } ]
+            },
+            {
+                ""id"": ""act-bio-mat"",
+                ""name"": ""Mat. Biodegradable"",
+                ""description"": ""Se degrada en 30 días."",
+                ""cost"": 200,
+                ""category"": ""ATRIBUTOS_PRODUCCION"",
+                ""isInitiallyLocked"": true,
+                ""prerequisiteActionId"": ""act-pack-recycle"",
+                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.40 }, { ""dimensionId"": ""dim-quality"", ""delta"": 0.10 } ]
+            },
+            {
+                ""id"": ""act-local"",
+                ""name"": ""Producción Local"",
+                ""description"": ""Menor huella de carbono."",
+                ""cost"": 100,
+                ""category"": ""ATRIBUTOS_PRODUCCION"",
+                ""isInitiallyLocked"": true,
+                ""prerequisiteActionId"": ""act-pack-recycle"",
+                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.15 } ]
+            },
+            {
+                ""id"": ""act-carbon"",
+                ""name"": ""Cert. Carbono Neutro"",
+                ""description"": ""Sello internacional."",
+                ""cost"": 250,
+                ""category"": ""ATRIBUTOS_PRODUCCION"",
+                ""isInitiallyLocked"": true,
+                ""prerequisiteActionId"": ""act-bio-mat"",
+                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""delta"": 0.40 } ]
+            },
+            {
+                ""id"": ""act-label"",
+                ""name"": ""Etiqueta Verde"",
+                ""description"": ""Look natural."",
+                ""cost"": 100,
+                ""category"": ""ATRIBUTOS_DISENO"",
+                ""isInitiallyLocked"": false,
+                ""effects"": [ { ""dimensionId"": ""dim-social"", ""delta"": 0.10 } ]
+            },
+            {
+                ""id"": ""act-research-1"",
+                ""name"": ""Encuesta General"",
+                ""description"": ""Datos básicos."",
+                ""cost"": 100,
+                ""category"": ""EXPLORACION"",
+                ""isInitiallyLocked"": false,
+                ""effects"": []
+            },
+            {
+                ""id"": ""act-research-2"",
+                ""name"": ""Focus Group Eco"",
+                ""description"": ""Valores ambientales."",
+                ""cost"": 200,
+                ""category"": ""EXPLORACION"",
+                ""isInitiallyLocked"": true,
+                ""prerequisiteActionId"": ""act-research-1"",
+                ""effects"": []
+            }
+        ],
+        ""events"": [
+            {
+                ""id"": ""evt-green-world"",
+                ""title"": ""EL MUNDO SE VUELVE MÁS VERDE"",
+                ""description"": ""Impulso global por la sostenibilidad."",
+                ""effects"": [ { ""dimensionId"": ""dim-eco"", ""weightMultiplier"": 3.0 } ]
+            }
+        ]
+    }";
+
     public static GameContext GetEcoGameContext()
     {
-        GameContext ctx = new GameContext();
-
-        // 1. DEFINIR LAS DIMENSIONES
-        ctx.PriceSensitivity = new DimensionDefinition("PriceSensitivity", "Sensibilidad al precio");
-        ctx.SocialRecognition = new DimensionDefinition("SocialRecognition", "Búsqueda de estatus");
-        ctx.QualityExpectation = new DimensionDefinition("QualityExpectation", "Exigencia de calidad");
-        ctx.EcoInterest = new DimensionDefinition("EcoInterest", "Interés ecológico");
-        ctx.EaseOfUse = new DimensionDefinition("EaseOfUse", "Facilidad de uso");
-
-        // 2. CREAR CONSUMIDOR
-        ctx.Consumer = new ConsumerProfile();
+        // 1. DESERIALIZAR (Convertir Texto JSON -> Objetos C#)
+        GameScenarioConfig config = JsonUtility.FromJson<GameScenarioConfig>(jsonEcoScenario);
         
-        // Setear valores iniciales
-        ctx.Consumer.Set(ctx.PriceSensitivity, 0.4f);    
-        ctx.Consumer.Set(ctx.SocialRecognition, 0.6f);   
-        ctx.Consumer.Set(ctx.QualityExpectation, 0.8f);  
-        ctx.Consumer.Set(ctx.EcoInterest, 0.95f);        
-
-        ctx.NombreConsumidor = "Barry Seal";
-        ctx.EdadConsumidor = 30;
-        ctx.Presupuesto = 1300;
-        ctx.AceptacionObjetivo = 0.80f;
-
-        // 3. CREAR PRODUCTO INICIAL
-        ctx.Product = new ProductProfile();
-        ctx.Product.Set(ctx.PriceSensitivity, 0.5f);   
-        ctx.Product.Set(ctx.SocialRecognition, 0.3f);  
-        ctx.Product.Set(ctx.QualityExpectation, 0.4f); 
-        ctx.Product.Set(ctx.EcoInterest, 0.1f);        
-
-        // 4. MAPEAR ACCIONES
-        ctx.ActionsMap = new Dictionary<int, MarketAction>();
+        GameContext ctx = new GameContext();
+        ctx.DimensionsMap = new Dictionary<string, DimensionDefinition>();
+        ctx.ActionsMap = new Dictionary<string, MarketAction>();
         ctx.AccionesVisuales = new List<AccionInfo>();
+        ctx.EventosConfigurados = config.events ?? new List<EventConfig>();
 
-        // A. PRODUCCIÓN
-        // Nivel 1
-        CrearAccion(ctx, 1, "Empaque Reciclado", "Cartón 100% reciclado.", 150, "ATRIBUTOS_PRODUCCION", false, 0, ctx.EcoInterest, 0.15f);
-        // Nivel 2
-        CrearAccion(ctx, 2, "Mat. Biodegradable", "Se degrada en 30 días.", 200, "ATRIBUTOS_PRODUCCION", true, 1, ctx.EcoInterest, 0.25f);
-        CrearAccion(ctx, 3, "Producción Local", "Menor huella de carbono.", 100, "ATRIBUTOS_PRODUCCION", true, 1, ctx.EcoInterest, 0.10f);
-        // Nivel 3
-        CrearAccion(ctx, 4, "Cert. Carbono Neutro", "Sello internacional.", 250, "ATRIBUTOS_PRODUCCION", true, 2, ctx.EcoInterest, 0.30f);
+        // 2. CONFIGURAR DIMENSIONES
+        // Se crean las definiciones reales a partir del config
+        foreach(var dimConfig in config.dimensions)
+        {
+            var def = new DimensionDefinition(dimConfig.name, dimConfig.description);
+            ctx.DimensionsMap.Add(dimConfig.id, def);
+        }
 
-        // B. DISEÑO
-        // Nivel 1
-        CrearAccion(ctx, 10, "Etiqueta Verde", "Look natural.", 100, "ATRIBUTOS_DISENO", false, 0, ctx.SocialRecognition, 0.05f);
-        // Nivel 2
-        CrearAccion(ctx, 11, "Logo Minimalista", "Estilo moderno.", 150, "ATRIBUTOS_DISENO", true, 10, ctx.SocialRecognition, 0.10f);
-        CrearAccion(ctx, 12, "Envase Ergonómico", "Fácil de agarrar.", 120, "ATRIBUTOS_DISENO", true, 10, ctx.QualityExpectation, 0.05f);
+        // 3. CONFIGURAR PERFILES (Consumidor y Producto)
+        ctx.Consumer = new ConsumerProfile();
+        ctx.Product = new ProductProfile();
 
-        // C. PRECIO
-        // Nivel 1
-        CrearAccion(ctx, 20, "Precio Estándar", "Promedio del mercado.", 50, "ATRIBUTOS_PRECIO", false, 0, ctx.PriceSensitivity, 0.02f);
-        // Nivel 2
-        CrearAccion(ctx, 21, "Desc. por Reciclaje", "5% si traen envase.", 80, "ATRIBUTOS_PRECIO", true, 20, ctx.EcoInterest, 0.10f);
-        CrearAccion(ctx, 22, "Suscripción Mensual", "Envío automático.", 100, "ATRIBUTOS_PRECIO", true, 20, ctx.PriceSensitivity, 0.05f);
+        // Se llenan los valores iniciales usando el mapa de dimensiones
+        foreach(var dimConfig in config.dimensions)
+        {
+            if(ctx.DimensionsMap.TryGetValue(dimConfig.id, out var def))
+            {
+                ctx.Consumer.Set(def, dimConfig.consumerExpectation);
+                ctx.Product.Set(def, dimConfig.productInitialOffer);
+            }
+        }
 
-        // D. PLAZA
-        // Nivel 1
-        CrearAccion(ctx, 30, "Tienda Online", "Venta web directa.", 150, "ATRIBUTOS_PLAZA", false, 0, ctx.EaseOfUse, 0.10f);
-        // Nivel 2
-        CrearAccion(ctx, 31, "Mercados Orgánicos", "Puntos de venta eco.", 100, "ATRIBUTOS_PLAZA", true, 30, ctx.EcoInterest, 0.15f);
-        CrearAccion(ctx, 32, "Apps de Delivery", "UberEats/Rappi.", 200, "ATRIBUTOS_PLAZA", true, 30, ctx.PriceSensitivity, -0.05f); // Más caro
+        ctx.NombreConsumidor = config.consumer.name;
+        ctx.EdadConsumidor = config.consumer.age;
+        ctx.PresupuestoInicial = config.consumer.budget;
+        ctx.AceptacionObjetivo = config.consumer.targetAcceptanceScore;
 
-        // E. EXPLORACIÓN
-        // Nivel 1
-        CrearAccion(ctx, 40, "Encuesta General", "Datos demográficos.", 100, "EXPLORACION", false, 0, null, 0); // Revela Social (200)
-        // Nivel 2
-        CrearAccion(ctx, 41, "Focus Group Eco", "Valores ambientales.", 200, "EXPLORACION", true, 40, null, 0); // Revela Cultural (100)
-        CrearAccion(ctx, 42, "Análisis Estilo", "Hábitos de vida.", 150, "EXPLORACION", true, 40, null, 0); // Revela Personal (300)
-        CrearAccion(ctx, 43, "Test Motivacional", "Impulsos de compra.", 150, "EXPLORACION", true, 40, null, 0); // Revela Psico (400)
+        // 4. CONFIGURAR ACCIONES
+        foreach(var actConfig in config.actions)
+        {
+            // A. Lógica (Core)
+            var actionLogic = new MarketAction(actConfig.name, actConfig.description, (decimal)actConfig.cost);
+            
+            // Añadir efectos a la acción lógica
+            foreach(var effect in actConfig.effects)
+            {
+                if(ctx.DimensionsMap.TryGetValue(effect.dimensionId, out var dimDef))
+                {
+                    actionLogic.AddEffect(dimDef, effect.delta);
+                }
+            }
+            ctx.ActionsMap.Add(actConfig.id, actionLogic);
 
-        // F. PUBLICIDAD
-        // Nivel 1
-        CrearAccion(ctx, 50, "Redes Sociales", "Facebook/Instagram.", 150, "PUBLICIDAD", false, 0, ctx.SocialRecognition, 0.05f);
-        // Nivel 2
-        CrearAccion(ctx, 51, "Influencers Eco", "Activistas verdes.", 300, "PUBLICIDAD", true, 50, ctx.EcoInterest, 0.20f);
-        CrearAccion(ctx, 52, "Google Ads", "Búsqueda pagada.", 200, "PUBLICIDAD", true, 50, ctx.PriceSensitivity, 0.02f);
+            // B. Visual (Unity UI)
+            // Se genera un ID numérico temporal (hash) para que la UI vieja funcione
+            // pero se guarda el UUID real para la lógica.
+            int tempId = Mathf.Abs(actConfig.id.GetHashCode()); 
 
-        // 5. EVENTOS
-        ctx.eventosPosibles = new List<Evento>();
-        ctx.eventosPosibles.Add(new Evento { 
-            idEvento = 1, 
-            tituloNoticia = "El Mundo Se Vuelve Más Verde", 
-            detalleNoticia = "Impulso global por la sostenibilidad gana fuerza." 
-        });
+            ctx.AccionesVisuales.Add(new AccionInfo {
+                idAccion = tempId, // ID temporal para la UI existente
+                originalUuid = actConfig.id, // El ID real de la API
+                nombreAccion = actConfig.name,
+                descripcion = actConfig.description,
+                costo = actConfig.cost,
+                categoria = actConfig.category,
+                esBloqueadaInicialmente = actConfig.isInitiallyLocked,
+                idAccionRequeridaUuid = actConfig.prerequisiteActionId
+            });
+        }
 
-        // 6. EFECTOS DE EVENTOS
-        ctx.efectosEventos = new List<EventoEfecto>();
-        ctx.efectosEventos.Add(new EventoEfecto { idEvento = 1, idSubfactor = 100, modificadorPeso = 5.0f });
-
-        ctx.historialTurnos = new List<Turno>();
+        // Post-proceso: Enlazar prerequisitos visuales usando los IDs temporales
+        foreach(var visual in ctx.AccionesVisuales)
+        {
+            if(!string.IsNullOrEmpty(visual.idAccionRequeridaUuid))
+            {
+                var padre = ctx.AccionesVisuales.Find(a => a.originalUuid == visual.idAccionRequeridaUuid);
+                if(padre != null) visual.idAccionRequerida = padre.idAccion;
+            }
+        }
 
         return ctx;
-    }
-
-    // Helper para crear acciones rápido
-    private static void CrearAccion(GameContext ctx, int id, string nombre, string desc, float costo, string cat, bool bloqueada, int req, DimensionDefinition dimAfectada, float impacto)
-    {
-        var accionLogica = new MarketAction(nombre, desc, (decimal)costo);
-        if (dimAfectada != null) accionLogica.AddEffect(dimAfectada, impacto);
-        
-        ctx.ActionsMap.Add(id, accionLogica);
-        ctx.AccionesVisuales.Add(new AccionInfo {
-            idAccion = id,
-            nombreAccion = nombre,
-            descripcion = desc,
-            costo = costo,
-            categoria = cat,
-            esBloqueadaInicialmente = bloqueada,
-            idAccionRequerida = req
-        });
     }
 }
