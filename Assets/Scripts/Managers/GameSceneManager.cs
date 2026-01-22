@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.Collections;
 using UnityEngine.Networking;
 using System.Linq;
+using MarkenX.Api.Config;
+using MarkenX.Api.Services;
+using MarkenX.Api.Mappers;
+using MarkenX.Api.Dtos;
 
 public class GameSceneManager : MonoBehaviour
 {
@@ -16,7 +20,7 @@ public class GameSceneManager : MonoBehaviour
     private int turnoActual;
     private string noticiaTituloActual;
     private string noticiaDetalleActual;
-    
+
     // LOGICA INTERNA
     private PartidaDataPayload partidaData;
     private List<EscenarioPerfilSubfactor> perfilActualizado;
@@ -24,19 +28,48 @@ public class GameSceneManager : MonoBehaviour
     // Historial de compras (para bloquear botones)
     private HashSet<int> accionesCompradasTotal = new HashSet<int>();
     private List<Accion> accionesCompradasEsteTurno = new List<Accion>();
-    
+
     // ÁRBOL DE HABILIDADES Y DESCUBRIMIENTO
     private HashSet<int> accionesDesbloqueadas = new HashSet<int>();
     private HashSet<int> subfactoresDescubiertos = new HashSet<int>();
+
+    // HISTORIAL DE TURNOS (para POST al backend)
+    private List<TurnHistoryDto> historialTurnosApi = new List<TurnHistoryDto>();
 
     // Estado Global para MainMenu
     public bool juegoTerminado = false;
 
     // CONFIGURACIÓN
     [Header("Configuración")]
+    [Tooltip("Si está activo, usa datos mock locales en lugar de la API. En WebGL con token, se ignora y usa API real.")]
     public bool usarModoSimulacion = true;
     [Range(0f, 1f)]
     public float probabilidadEvento = 0.40f; // Probabilidad alta
+
+    /// <summary>
+    /// Determina si se debe usar el modo simulación.
+    /// En WebGL compilado con token válido, siempre usa API real (modo producción).
+    /// En Editor o sin token, respeta el valor de usarModoSimulacion.
+    /// </summary>
+    private bool DebeUsarModoSimulacion()
+    {
+        // Si estamos en modo producción (WebGL con token), nunca usar simulación
+        if (ApiConfig.Instance != null && ApiConfig.Instance.IsProductionMode)
+        {
+            Debug.Log("[GameSceneManager] Modo producción detectado (WebGL + token). Usando API real.");
+            return false;
+        }
+
+        // En otros casos, respetar la configuración del Inspector
+        return usarModoSimulacion;
+    }
+
+    [Header("Estado de Carga")]
+    [SerializeField] private bool _isLoading = false;
+    [SerializeField] private string _loadError = "";
+
+    public bool IsLoading => _isLoading;
+    public string LoadError => _loadError;
 
     void Awake()
     {
@@ -53,17 +86,83 @@ public class GameSceneManager : MonoBehaviour
 
     IEnumerator CargarReglasCoroutine(string idAsignacion)
     {
-        if (usarModoSimulacion)
+        _isLoading = true;
+        _loadError = "";
+
+        // Esperar a que ApiConfig esté listo para determinar el modo
+        while (ApiConfig.Instance == null || !ApiConfig.Instance.IsConfigLoaded)
         {
-            // MODO OFFLINE
-            yield return new WaitForSeconds(0.5f); // Simulación de carga
-            partidaData = MockDataFactory.GetMockData(); // Carga los datos
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        // Determinar si usar modo simulación basado en el entorno
+        bool modoSimulacion = DebeUsarModoSimulacion();
+
+        if (modoSimulacion)
+        {
+            // MODO OFFLINE - Usar datos mock locales
+            Debug.Log("[GameSceneManager] Modo simulación activo, usando MockDataFactory");
+            yield return new WaitForSeconds(0.5f);
+            partidaData = MockDataFactory.GetMockData();
             InicializarJuego();
+            _isLoading = false;
             SceneManager.LoadScene("GameScene");
             yield break;
         }
 
-        // ... AQUÍ IRÍA LA LLAMADA WEB REAL ...
+        // MODO ONLINE - Cargar desde API REST
+        Debug.Log("[GameSceneManager] Modo producción activo, cargando desde API");
+
+        // Determinar el scenarioId a usar
+        string scenarioId = !string.IsNullOrEmpty(idAsignacion) ? idAsignacion : ApiConfig.Instance.ScenarioId;
+
+        if (string.IsNullOrEmpty(scenarioId))
+        {
+            _loadError = "No se especificó un scenarioId válido";
+            _isLoading = false;
+            Debug.LogError($"[GameSceneManager] {_loadError}");
+            yield break;
+        }
+
+        // Llamar al servicio de API
+        bool requestComplete = false;
+        bool requestSuccess = false;
+
+        ScenarioApiService.Instance.GetScenarioById(scenarioId,
+            // onSuccess
+            (ScenarioDetailResponse response) =>
+            {
+                partidaData = ScenarioDataMapper.ToPartidaDataPayload(response);
+                requestSuccess = partidaData != null;
+                if (!requestSuccess)
+                    _loadError = "Error al mapear los datos del escenario";
+                requestComplete = true;
+            },
+            // onError
+            (string error) =>
+            {
+                _loadError = error;
+                requestComplete = true;
+            }
+        );
+
+        // Esperar a que se complete el request
+        while (!requestComplete)
+        {
+            yield return null;
+        }
+
+        _isLoading = false;
+
+        if (requestSuccess)
+        {
+            InicializarJuego();
+            SceneManager.LoadScene("GameScene");
+        }
+        else
+        {
+            Debug.LogError($"[GameSceneManager] Error cargando escenario: {_loadError}");
+        }
     }
 
     void InicializarJuego()
@@ -73,10 +172,13 @@ public class GameSceneManager : MonoBehaviour
         turnoActual = 1;
         noticiaTituloActual = "";
         noticiaDetalleActual = "";
-        
+
         perfilActualizado = new List<EscenarioPerfilSubfactor>(partidaData.perfilConsumidor);
         accionesCompradasEsteTurno.Clear();
-        accionesCompradasTotal.Clear(); // Limpiar historial
+        accionesCompradasTotal.Clear();
+
+        // Limpiar historial de turnos para la API
+        historialTurnosApi.Clear();
 
         // Lógica Árbol: Desbloquear acciones iniciales (las que no tienen padre o idReq=0)
         accionesDesbloqueadas.Clear();
@@ -133,14 +235,13 @@ public class GameSceneManager : MonoBehaviour
     }
 
     // LÓGICA DE TURNO (IA LOCAL)
-    
+
     public void TerminarTurno()
     {
         // 1. Calcular Impacto (Fórmula Ai * Wi)
         float impactoTurno = 0;
         foreach (Accion accion in accionesCompradasEsteTurno)
         {
-            // Busca reglas para esta acción
             var reglas = partidaData.reglasImpacto.Where(r => r.idAccion == accion.idAccion);
             foreach (var regla in reglas)
             {
@@ -151,22 +252,24 @@ public class GameSceneManager : MonoBehaviour
                 }
             }
         }
-        
+
         aceptacionActual = Mathf.Clamp(aceptacionActual + impactoTurno, 0, 100);
 
-        // 2. Procesar Eventos (Noticias) - En turno 3 para la demo
-        if (turnoActual == 2)
+        // 2. Procesar Eventos (Noticias)
+        string eventoOcurrido = "";
+        if (turnoActual == 2 && partidaData.eventosPosibles != null && partidaData.eventosPosibles.Count > 0)
         {
-             var evento = partidaData.eventosPosibles[0]; // "Mundo Verde"
-             noticiaTituloActual = evento.tituloNoticia;
-             noticiaDetalleActual = evento.detalleNoticia;
-             
-             // Aplicar efecto (Subir peso ecológico)
-             var efecto = partidaData.efectosEventos.Find(e => e.idEvento == evento.idEvento);
-             if(efecto != null) {
+            var evento = partidaData.eventosPosibles[0];
+            noticiaTituloActual = evento.tituloNoticia;
+            noticiaDetalleActual = evento.detalleNoticia;
+            eventoOcurrido = evento.tituloNoticia;
+
+            var efecto = partidaData.efectosEventos.Find(e => e.idEvento == evento.idEvento);
+            if (efecto != null)
+            {
                 var factorEco = perfilActualizado.Find(f => f.idSubfactor == efecto.idSubfactor);
-                if(factorEco != null) factorEco.peso += efecto.modificadorPeso;
-             }
+                if (factorEco != null) factorEco.peso += efecto.modificadorPeso;
+            }
         }
         else
         {
@@ -174,23 +277,109 @@ public class GameSceneManager : MonoBehaviour
             noticiaDetalleActual = "";
         }
 
+        // 3. Registrar turno en historial para API
+        GuardarTurnoEnHistorial(eventoOcurrido);
+
         turnoActual++;
         accionesCompradasEsteTurno.Clear();
+    }
 
+    /// <summary>
+    /// Guarda el estado actual del turno en el historial para enviar al backend.
+    /// </summary>
+    private void GuardarTurnoEnHistorial(string eventoOcurrido)
+    {
+        var turnHistory = new TurnHistoryDto
+        {
+            turnNumber = turnoActual,
+            acceptanceAtEnd = aceptacionActual / 100f, // Normalizar a 0-1
+            budgetAtEnd = presupuestoActual,
+            eventOccurredTitle = eventoOcurrido,
+            actionsTakenIds = accionesCompradasEsteTurno
+                .Select(a => ScenarioDataMapper.GetApiActionId(a.idAccion))
+                .ToList()
+        };
+
+        historialTurnosApi.Add(turnHistory);
     }
 
     // Función llamarla desde el botón "TERMINAR"
     public void EjecutarFinDeJuego(string resultado)
     {
-        juegoTerminado = true; // Marcar para bloquear menú
+        juegoTerminado = true;
 
+        // Guardar estado local para UI
         GameState.resultadoJuego = resultado;
         GameState.ultimoTurno = turnoActual;
         GameState.presupuestoRestante = presupuestoActual;
         GameState.nivelAceptacion = aceptacionActual / 100f;
-        GameState.nivelPerfil = GetNivelPerfil(); 
+        GameState.nivelPerfil = GetNivelPerfil();
+
+        // Enviar sesión al backend si estamos en modo producción (WebGL con token)
+        if (ApiConfig.Instance != null && ApiConfig.Instance.IsProductionMode)
+        {
+            EnviarSesionAlBackend();
+        }
+        else
+        {
+            Debug.Log("[GameSceneManager] Modo simulación - No se envía sesión al backend");
+        }
 
         SceneManager.LoadScene("EndGameScene");
+    }
+
+    /// <summary>
+    /// Envía los datos de la sesión de juego al backend.
+    /// </summary>
+    private void EnviarSesionAlBackend()
+    {
+        if (GameSessionApiService.Instance == null || ApiConfig.Instance == null)
+        {
+            Debug.LogWarning("[GameSceneManager] Servicios API no disponibles, no se enviará la sesión");
+            return;
+        }
+
+        string taskId = ApiConfig.Instance.TaskId;
+        string studentId = ApiConfig.Instance.StudentId;
+
+        if (string.IsNullOrEmpty(taskId))
+        {
+            taskId = ApiConfig.Instance.ScenarioId; // Fallback: usar scenarioId como taskId
+        }
+
+        if (string.IsNullOrEmpty(studentId))
+        {
+            Debug.LogWarning("[GameSceneManager] StudentId no configurado, usando 'anonymous'");
+            studentId = "anonymous";
+        }
+
+        var request = GameSessionApiService.Instance.CreateRequestFromGameState(
+            taskId: taskId,
+            studentId: studentId,
+            finalAcceptance: aceptacionActual / 100f,
+            remainingBudget: presupuestoActual,
+            totalTurnsUsed: turnoActual,
+            profileDiscoveryPercentage: GetNivelPerfil(),
+            history: historialTurnosApi
+        );
+
+        GameSessionApiService.Instance.RegisterGameSession(request,
+            onSuccess: (response) =>
+            {
+                Debug.Log($"[GameSceneManager] Sesión registrada exitosamente. ID: {response.id}");
+                Debug.Log($"[GameSceneManager] Resultado del backend: {response.finalOutcome}");
+
+                // Actualizar resultado con el calculado por el backend
+                if (!string.IsNullOrEmpty(response.finalOutcome))
+                {
+                    GameState.resultadoJuego = response.finalOutcome;
+                }
+            },
+            onError: (error) =>
+            {
+                Debug.LogError($"[GameSceneManager] Error al registrar sesión: {error}");
+            }
+        );
     }
 
     // GETTERS PARA LA UI
